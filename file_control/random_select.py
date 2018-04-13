@@ -5,8 +5,8 @@ import shutil
 import random
 import os.path
 
-#src_dir = '/data/Bodypart/SKULL'
-#target_dir = '/data/Bodypart/sample/Skull/images'
+src_dir = '/data/Bodypart/SKULL'
+target_dir = '/data/Bodypart/sample/Skull/images'
 
 target_num = 500
 
