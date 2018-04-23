@@ -21,13 +21,13 @@ import unittest
 
 import tensorflow as tf  # pylint: disable=g-bad-import-order
 
-from official.resnet import imagenet_main
-from official.utils.testing import integration
+from resnet import dicom_main
+from utils.testing import integration
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 
-_BATCH_SIZE = 32
-_LABEL_CLASSES = 1001
+_BATCH_SIZE = 4
+_LABEL_CLASSES = 7
 
 
 class BaseTest(tf.test.TestCase):
@@ -51,7 +51,7 @@ class BaseTest(tf.test.TestCase):
 
     with graph.as_default(), self.test_session(
         graph=graph, use_gpu=with_gpu, force_gpu=with_gpu):
-      model = imagenet_main.ImagenetModel(
+      model = dicom_main.ImagenetModel(
           resnet_size=resnet_size,
           data_format='channels_first' if with_gpu else 'channels_last',
           version=version,
@@ -185,11 +185,11 @@ class BaseTest(tf.test.TestCase):
     with tf.Graph().as_default() as g:
       tf.train.create_global_step()
 
-      input_fn = imagenet_main.get_synth_input_fn()
+      input_fn = dicom_main.get_synth_input_fn()
       dataset = input_fn(True, '', _BATCH_SIZE)
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
-      spec = imagenet_main.imagenet_model_fn(
+      spec = dicom_main.imagenet_model_fn(
           features, labels, mode, {
               'dtype': dtype,
               'resnet_size': 50,
@@ -267,7 +267,7 @@ class BaseTest(tf.test.TestCase):
     batch_size = 135
     num_classes = 246
 
-    model = imagenet_main.ImagenetModel(
+    model = dicom_main.ImagenetModel(
         50, data_format='channels_last', num_classes=num_classes,
         version=version)
 
@@ -284,37 +284,37 @@ class BaseTest(tf.test.TestCase):
 
   def test_imagenet_end_to_end_synthetic_v1(self):
     integration.run_synthetic(
-        main=imagenet_main.main, tmp_root=self.get_temp_dir(),
+        main=dicom_main.main, tmp_root=self.get_temp_dir(),
         extra_flags=['-v', '1']
     )
 
   def test_imagenet_end_to_end_synthetic_v2(self):
     integration.run_synthetic(
-        main=imagenet_main.main, tmp_root=self.get_temp_dir(),
+        main=dicom_main.main, tmp_root=self.get_temp_dir(),
         extra_flags=['-v', '2']
     )
 
   def test_imagenet_end_to_end_synthetic_v1_tiny(self):
     integration.run_synthetic(
-        main=imagenet_main.main, tmp_root=self.get_temp_dir(),
+        main=dicom_main.main, tmp_root=self.get_temp_dir(),
         extra_flags=['-v', '1', '-rs', '18']
     )
 
   def test_imagenet_end_to_end_synthetic_v2_tiny(self):
     integration.run_synthetic(
-        main=imagenet_main.main, tmp_root=self.get_temp_dir(),
+        main=dicom_main.main, tmp_root=self.get_temp_dir(),
         extra_flags=['-v', '2', '-rs', '18']
     )
 
   def test_imagenet_end_to_end_synthetic_v1_huge(self):
     integration.run_synthetic(
-        main=imagenet_main.main, tmp_root=self.get_temp_dir(),
+        main=dicom_main.main, tmp_root=self.get_temp_dir(),
         extra_flags=['-v', '1', '-rs', '200']
     )
 
   def test_imagenet_end_to_end_synthetic_v2_huge(self):
     integration.run_synthetic(
-        main=imagenet_main.main, tmp_root=self.get_temp_dir(),
+        main=dicom_main.main, tmp_root=self.get_temp_dir(),
         extra_flags=['-v', '2', '-rs', '200']
     )
 

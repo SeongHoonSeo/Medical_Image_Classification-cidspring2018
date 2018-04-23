@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Runs a ResNet model on the ImageNet dataset."""
+"""Runs a ResNet model on the DICOM dataset."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -23,20 +23,20 @@ import sys
 
 import tensorflow as tf  # pylint: disable=g-bad-import-order
 
-from official.resnet import imagenet_preprocessing
-from official.resnet import resnet_model
-from official.resnet import resnet_run_loop
+from resnet import dicom_preprocessing
+from resnet import resnet_model
+from resnet import resnet_run_loop
 
 _DEFAULT_IMAGE_SIZE = 224
 _NUM_CHANNELS = 3
-_NUM_CLASSES = 1001
+_NUM_CLASSES = 7
 
 _NUM_IMAGES = {
-    'train': 1281167,
-    'validation': 50000,
+    'train': 2688,
+    'validation': 300,
 }
 
-_NUM_TRAIN_FILES = 1024
+_NUM_TRAIN_FILES = 1
 _SHUFFLE_BUFFER = 1500
 
 
@@ -46,13 +46,9 @@ _SHUFFLE_BUFFER = 1500
 def get_filenames(is_training, data_dir):
   """Return filenames for dataset."""
   if is_training:
-    return [
-        os.path.join(data_dir, 'train-%05d-of-01024' % i)
-        for i in range(_NUM_TRAIN_FILES)]
+    return [os.path.join(data_dir, 'dicom_train.tfrecord')]
   else:
-    return [
-        os.path.join(data_dir, 'validation-%05d-of-00128' % i)
-        for i in range(128)]
+    return [os.path.join(data_dir, 'dicom_validation.tfrecord')]
 
 
 def _parse_example_proto(example_serialized):
@@ -141,7 +137,7 @@ def parse_record(raw_record, is_training):
   """
   image_buffer, label, bbox = _parse_example_proto(raw_record)
 
-  image = imagenet_preprocessing.preprocess_image(
+  image = dicom_preprocessing.preprocess_image(
       image_buffer=image_buffer,
       bbox=bbox,
       output_height=_DEFAULT_IMAGE_SIZE,
@@ -176,7 +172,7 @@ def input_fn(is_training, data_dir, batch_size, num_epochs=1,
   filenames = get_filenames(is_training, data_dir)
   dataset = tf.data.Dataset.from_tensor_slices(filenames)
 
-  if is_training:
+  if is_training:s
     # Shuffle the input files
     dataset = dataset.shuffle(buffer_size=_NUM_TRAIN_FILES)
 

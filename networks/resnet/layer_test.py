@@ -34,8 +34,8 @@ from __future__ import print_function
 import sys
 
 import tensorflow as tf   # pylint: disable=g-bad-import-order
-from official.resnet import resnet_model
-from official.utils.testing import reference_data
+from resnet import resnet_model
+from utils.testing import reference_data
 
 
 DATA_FORMAT = "channels_last"  # CPU instructions often preclude channels_first
