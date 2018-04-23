@@ -486,7 +486,10 @@ class ResnetArgParser(argparse.ArgumentParser):
         help='[default: %(default)s] The size of the ResNet model to use.',
         metavar='<RS>' if resnet_size_choices is None else None
     )
-
+    self.add_argument(
+        '--multi_gpu', '-mg', type=bool, default=False,
+        choices=[False, True]
+    )
   def parse_args(self, args=None, namespace=None):
     args = super(ResnetArgParser, self).parse_args(
         args=args, namespace=namespace)
