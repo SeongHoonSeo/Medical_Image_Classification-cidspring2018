@@ -33,8 +33,8 @@ from google.cloud import bigquery
 
 import tensorflow as tf  # pylint: disable=g-bad-import-order
 
-from official.utils.arg_parsers import parsers
-from official.utils.logs import logger
+from utils.arg_parsers import parsers
+from utils.logs import logger
 
 
 class BigQueryUploader(object):

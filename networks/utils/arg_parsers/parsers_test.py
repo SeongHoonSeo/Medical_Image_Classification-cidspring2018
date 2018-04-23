@@ -18,7 +18,7 @@ import unittest
 
 import tensorflow as tf  # pylint: disable=g-bad-import-order
 
-from official.utils.arg_parsers import parsers
+from utils.arg_parsers import parsers
 
 
 class TestParser(argparse.ArgumentParser):

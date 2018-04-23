@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import os
 import sys
+sys.path.append('../')
 
 import tensorflow as tf  # pylint: disable=g-bad-import-order
 
@@ -172,7 +173,7 @@ def input_fn(is_training, data_dir, batch_size, num_epochs=1,
   filenames = get_filenames(is_training, data_dir)
   dataset = tf.data.Dataset.from_tensor_slices(filenames)
 
-  if is_training:s
+  if is_training:
     # Shuffle the input files
     dataset = dataset.shuffle(buffer_size=_NUM_TRAIN_FILES)
 
