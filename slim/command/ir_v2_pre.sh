@@ -1,0 +1,13 @@
+nohup python ../train_image_classifier.py \
+--train_dir=../experiment/ir_v2_pre/ \
+--dataset_name=dicom \
+--dataset_split_name=train \
+--dataset_dir=/tmp/slim_data \
+--model_name=inception_resnet_v2 \
+--batch_size=32 \
+--max_number_of_steps=210 \
+--checkpoint_path=../experiment/ir_v2_pre/model.ckpt-84 \
+--checkpoint_exclude_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits \
+--trainable_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits \
+--save_interval_secs=120 \
+--save_summaries_secs=120 > ../experiment/ir_v2_pre/train/log_epoch2.txt &
