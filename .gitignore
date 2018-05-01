@@ -2,6 +2,28 @@
 *.swp
 *.swo
 *.tfrecord
-*.pyc
+
 networks/resnet/results/
-dataset/__pycache__/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# C extensions
+*.so
+
+# DIstribution / packaging
+.Python
+build/
+dist/
+downloads
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+MANIFEST

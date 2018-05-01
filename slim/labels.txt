@@ -1,0 +1,7 @@
+0:none
+1:Skull
+2:Spine
+3:Chest
+4:Breast
+5:Abdomen
+6:Musculoskeletal
