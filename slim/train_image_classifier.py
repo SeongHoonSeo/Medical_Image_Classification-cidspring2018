@@ -25,6 +25,8 @@ from deployment import model_deploy
 from nets import nets_factory
 from preprocessing import preprocessing_factory
 
+import time
+
 slim = tf.contrib.slim
 
 tf.app.flags.DEFINE_string(
@@ -187,7 +189,7 @@ tf.app.flags.DEFINE_string(
     'as `None`, then the model_name flag is used.')
 
 tf.app.flags.DEFINE_integer(
-    'batch_size', 32, 'The number of samples in each batch.')
+    'batch_size', 4, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
     'train_image_size', None, 'Train image size')
@@ -218,6 +220,12 @@ tf.app.flags.DEFINE_boolean(
     'When restoring a checkpoint would ignore missing variables.')
 
 FLAGS = tf.app.flags.FLAGS
+
+#####################
+#    Custom Flag    #
+#####################
+
+start_time = time.perf_counter()
 
 
 def _configure_learning_rate(num_samples_per_epoch, global_step):
@@ -554,6 +562,14 @@ def main(_):
 
     # Add config to avoid 'could not satisfy explicit device' problem 
     sess_config = tf.ConfigProto(allow_soft_placement=True)
+
+    ###########################
+    # Custom Logging Process  #
+    ###########################
+
+    elapsed_time = time.perf_counter() - start_time
+    print ("Elapsed time: %.3f" % elapsed_time)
+    summaries.add(tf.summary.scalar("elapsed_time", elapsed_time))
 
     ###########################
     # Kicks off the training. #

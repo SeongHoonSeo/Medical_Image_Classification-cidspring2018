@@ -142,7 +142,7 @@ vgg_a.default_image_size = 224
 
 
 def vgg_16(inputs,
-           num_classes=1000,
+           num_classes=6,
            is_training=True,
            dropout_keep_prob=0.5,
            spatial_squeeze=True,
