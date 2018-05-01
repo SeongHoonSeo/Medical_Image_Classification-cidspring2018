@@ -3,3 +3,5 @@
 *.swo
 *.tfrecord
 *.pyc
+networks/resnet/results/
+dataset/__pycache__/

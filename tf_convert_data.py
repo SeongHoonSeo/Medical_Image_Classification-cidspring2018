@@ -20,7 +20,7 @@ Usage:
 python tf_convert_data.py \
     --dataset_name=dicom \
     --dataset_dir=/data/sample/training \
-    --output_name=kitti_train \
+    --output_name=dicom_train \
     --output_dir=/data/sample/training \
     --need_validation_split=False \ 
 ```

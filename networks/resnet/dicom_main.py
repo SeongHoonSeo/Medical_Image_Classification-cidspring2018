@@ -47,9 +47,9 @@ _SHUFFLE_BUFFER = 1500
 def get_filenames(is_training, data_dir):
   """Return filenames for dataset."""
   if is_training:
-    return [os.path.join(data_dir, 'dicom_train.tfrecord')]
+    return [os.path.join(data_dir, 'train-dicom.tfrecord')]
   else:
-    return [os.path.join(data_dir, 'dicom_validation.tfrecord')]
+    return [os.path.join(data_dir, 'test-dicom.tfrecord')]
 
 
 def _parse_example_proto(example_serialized):

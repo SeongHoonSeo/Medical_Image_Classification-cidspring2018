@@ -86,7 +86,7 @@ def _process_image(directory, name, f_jpeg_image_shape,
 #                               float(data[7]) / shape[0]
 #                               ))
                 # bbox
-                bboxes.append((0, 0, 1, 1)) # Set the entire image as bbox for classification task
+                bboxes.append((0.0, 0.0, 1.0, 1.0)) # Set the entire image as bbox for classification task
 
     return (image_data, shape, labels, labels_text,  bboxes)
 
@@ -124,6 +124,7 @@ def _convert_to_example(image_data, shape, labels, labels_text, bboxes):
             'image/object/bbox/ymin': float_feature(next(it_bboxes, [])),
             'image/object/bbox/xmax': float_feature(next(it_bboxes, [])),
             'image/object/bbox/ymax': float_feature(next(it_bboxes, [])),
+            'image/object/class/label': int64_feature(labels),
             }))
     return example
 

@@ -233,6 +233,7 @@ def resnet_model_fn(features, labels, mode, model_class,
       'probabilities': tf.nn.softmax(logits, name='softmax_tensor')
   }
 
+  print(predictions)
   if mode == tf.estimator.ModeKeys.PREDICT:
     # Return the predictions and the specification for serving a SavedModel
     return tf.estimator.EstimatorSpec(
@@ -303,6 +304,9 @@ def resnet_model_fn(features, labels, mode, model_class,
   accuracy = tf.metrics.accuracy(
       tf.argmax(labels, axis=1), predictions['classes'])
   metrics = {'accuracy': accuracy}
+  #top_five = tf.metrics.precision_at_top_k(
+  #    tf.argmax(labels, axis=1), predictions['classes'], 5)
+  #metrics = {'accuracy': accuracy, 'top_five': top_five}
 
   # Create a tensor named train_accuracy for logging purposes
   tf.identity(accuracy[1], name='train_accuracy')
