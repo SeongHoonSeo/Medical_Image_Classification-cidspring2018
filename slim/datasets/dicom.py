@@ -46,7 +46,6 @@ _ITEMS_TO_DESCRIPTIONS = {
 
 _NUM_CLASSES = 7
 
-
 def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
   """Gets a dataset tuple with instructions for reading ImageNet.
 

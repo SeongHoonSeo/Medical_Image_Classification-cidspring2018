@@ -22,7 +22,7 @@ python tf_convert_data.py \
     --dataset_dir=/data/sample/training \
     --output_name=dicom_train \
     --output_dir=/data/sample/training \
-    --need_validation_split=False \ 
+    --need_split=tvt_split \ 
 ```
 """
 import tensorflow as tf
@@ -43,9 +43,8 @@ tf.app.flags.DEFINE_string(
     'output_dir', './',
     'Output directory where to store TFRecords files.')
 tf.app.flags.DEFINE_string(
-    'need_validation_split', 'False',
-    'If true, splits the training dataset into train and validation set.')
-
+    'need_split', 'None',
+    'None: no spit, tt_split: train/test split, tvt_split: train/test/validation split')
 
 def main(_):
     if not FLAGS.dataset_dir:
@@ -54,10 +53,7 @@ def main(_):
     print('Output directory:', FLAGS.output_dir)
 
     if FLAGS.dataset_name == 'dicom':
-        if FLAGS.need_validation_split == 'True':
-            dicom_to_tfrecords.run(dataset_dir=FLAGS.dataset_dir, output_dir=FLAGS.output_dir, name=FLAGS.output_name, need_validation_split=True)
-        else:
-            dicom_to_tfrecords.run(dataset_dir=FLAGS.dataset_dir, output_dir=FLAGS.output_dir, name=FLAGS.output_name, need_validation_split=False)    
+        dicom_to_tfrecords.run(dataset_dir=FLAGS.dataset_dir, output_dir=FLAGS.output_dir, name=FLAGS.output_name, need_split=FLAGS.need_split)
     else:
         raise ValueError('Dataset [%s] was not recognized.' % FLAGS.dataset_name)
 

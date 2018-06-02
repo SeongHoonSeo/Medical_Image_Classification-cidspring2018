@@ -33,7 +33,7 @@ tf.app.flags.DEFINE_string(
     'master', '', 'The address of the TensorFlow master to use.')
 
 tf.app.flags.DEFINE_string(
-    'train_dir', '/tmp/tfmodel/',
+    'train_dir', '/data/tfmodel/',
     'Directory where checkpoints and event logs are written to.')
 
 tf.app.flags.DEFINE_integer('num_clones', 1,
@@ -167,13 +167,13 @@ tf.app.flags.DEFINE_float(
 #######################
 
 tf.app.flags.DEFINE_string(
-    'dataset_name', 'imagenet', 'The name of the dataset to load.')
+    'dataset_name', 'dicom', 'The name of the dataset to load.')
 
 tf.app.flags.DEFINE_string(
     'dataset_split_name', 'train', 'The name of the train/test split.')
 
 tf.app.flags.DEFINE_string(
-    'dataset_dir', None, 'The directory where the dataset files are stored.')
+    'dataset_dir', '/data/tfrecord/sample_3000', 'The directory where the dataset files are stored.')
 
 tf.app.flags.DEFINE_integer(
     'labels_offset', 0,
@@ -189,7 +189,7 @@ tf.app.flags.DEFINE_string(
     'as `None`, then the model_name flag is used.')
 
 tf.app.flags.DEFINE_integer(
-    'batch_size', 4, 'The number of samples in each batch.')
+    'batch_size', 32, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
     'train_image_size', None, 'Train image size')

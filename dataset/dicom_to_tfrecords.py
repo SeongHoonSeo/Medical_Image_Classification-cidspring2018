@@ -33,10 +33,13 @@ DEFAULT_IMAGE_DIR = 'images/'
 DEFAULT_LABEL_DIR = 'labels/'
 
 # The number of images in the validation set.
-NUM_VALIDATION = 300  # about 10% of the sample training set
+NUM_VALIDATION = 3002  # about 10% of the entire dataset
+NUM_TEST = 3001 # about 10% of the entire dataset
 
 # Seed for repeatability.
-RANDOM_SEED = 123
+# RANDOM_SEED = 123
+# RANDOM_SEED = 111 # first cross-validation
+RANDOM_SEED = 79
 
 
 def _jpeg_image_shape(image_data, sess, decoded_jpeg, inputs):
@@ -148,14 +151,14 @@ def _get_output_filename(output_dir, name):
     return '%s/%s.tfrecord' % (output_dir, name)
 
 
-def run(dataset_dir, output_dir, name='dicom_train', shuffling=True, need_validation_split=False):
+def run(dataset_dir, output_dir, name='dicom_train', shuffling=True, need_split='None'):
     """Runs the conversion operation.
 
     Args:
       dataset_dir: The dataset directory where the dataset is stored
       output_dir: Output directory where tfrecord file will be stored
       name: Name of the output tfrecord
-      need_validation_split: If true, split the training data into train and validation set
+      need_split: (None): no split, (tv_split): train/validation split, (tvt_split): train/validation/test split
     """
     if not tf.gfile.Exists(dataset_dir):
         tf.gfile.MakeDirs(dataset_dir)
@@ -178,34 +181,8 @@ def run(dataset_dir, output_dir, name='dicom_train', shuffling=True, need_valida
     inputs = tf.placeholder(dtype=tf.string)
     decoded_jpeg = tf.image.decode_jpeg(inputs, channels=3)
     with tf.Session() as sess:
-
-        if need_validation_split:
-            # Process dataset files (train and validation)
-            training_filenames = filenames[NUM_VALIDATION:]
-            validation_filenames = filenames[:NUM_VALIDATION]
-
-            with tf.python_io.TFRecordWriter(output_dir+'/dicom_train.tfrecord') as tfrecord_writer:
-                for i, filename in enumerate(training_filenames):
-                    sys.stdout.write('\r>> Converting image (Training) %d/%d' % (i+1, len(training_filenames)))
-                    sys.stdout.flush()
-
-                    name = filename[:-4]
-                    _add_to_tfrecord(dataset_dir, name, tfrecord_writer,
-                                     lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
-            print('\nFinished converting the DICOM dataset (Training)!')
-
-            with tf.python_io.TFRecordWriter(output_dir+'/dicom_validation.tfrecord') as tfrecord_writer:
-                for i, filename in enumerate(validation_filenames):
-                    sys.stdout.write('\r>> Converting image (Validation) %d/%d' % (i+1, len(validation_filenames)))
-                    sys.stdout.flush()
-
-                    name = filename[:-4]
-                    _add_to_tfrecord(dataset_dir, name, tfrecord_writer,
-                                     lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
-            print('\nFinished converting the DICOM dataset (Validation)!')
-
-        else:
-            # Process dataset files (full_train or test)
+        if need_split == 'None':
+            # Process dataset files (No split)
             with tf.python_io.TFRecordWriter(tf_filename) as tfrecord_writer:
                 for i, filename in enumerate(filenames):
                     sys.stdout.write('\r>> Converting image %d/%d' % (i+1, len(filenames)))
@@ -216,4 +193,63 @@ def run(dataset_dir, output_dir, name='dicom_train', shuffling=True, need_valida
                                      lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
             print('\nFinished converting the DICOM dataset!')
 
+        elif need_split == 'tt_split':
+            # Process dataset files (train test split)
+            train_filenames = filenames[NUM_TEST:]
+            test_filenames = filenames[:NUM_TEST]
 
+            with tf.python_io.TFRecordWriter(output_dir+'/train-dicom.tfrecord') as tfrecord_writer:
+                for i, filename in enumerate(train_filenames):
+                    sys.stdout.write('\r>> Converting image (Train) %d/%d' % (i+1, len(train_filenames)))
+                    sys.stdout.flush()
+
+                    name = filename[:-4]
+                    _add_to_tfrecord(dataset_dir, name, tfrecord_writer,
+                                     lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
+            print('\nFinished converting the DICOM dataset (Train)!')
+
+            with tf.python_io.TFRecordWriter(output_dir+'/test-dicom.tfrecord') as tfrecord_writer:
+                for i, filename in enumerate(test_filenames):
+                    sys.stdout.write('\r>> Converting image (Test) %d/%d' % (i+1, len(test_filenames)))
+                    sys.stdout.flush()
+
+                    name = filename[:-4]
+                    _add_to_tfrecord(dataset_dir, name, tfrecord_writer,
+                                     lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
+            print('\nFinished converting the DICOM dataset (Test)!')
+
+        elif need_split == 'tvt_split':
+            # Process dataset files (train validation test split)
+            train_filenames = filenames[NUM_TEST+NUM_VALIDATION:]
+            validation_filenames = filenames[NUM_TEST:NUM_TEST+NUM_VALIDATION]
+            test_filenames = filenames[:NUM_TEST]
+
+            with tf.python_io.TFRecordWriter(output_dir+'/train-dicom.tfrecord') as tfrecord_writer:
+                for i, filename in enumerate(train_filenames):
+                    sys.stdout.write('\r>> Converting image (Train) %d/%d' % (i+1, len(train_filenames)))
+                    sys.stdout.flush()
+
+                    name = filename[:-4]
+                    _add_to_tfrecord(dataset_dir, name, tfrecord_writer,
+                                     lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
+            print('\nFinished converting the DICOM dataset (Train)!')
+
+            with tf.python_io.TFRecordWriter(output_dir+'/validation-dicom.tfrecord') as tfrecord_writer:
+                for i, filename in enumerate(validation_filenames):
+                    sys.stdout.write('\r>> Converting image (Validation) %d/%d' % (i+1, len(validation_filenames)))
+                    sys.stdout.flush()
+
+                    name = filename[:-4]
+                    _add_to_tfrecord(dataset_dir, name, tfrecord_writer,
+                                     lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
+            print('\nFinished converting the DICOM dataset (Validation)!')
+
+            with tf.python_io.TFRecordWriter(output_dir+'/test-dicom.tfrecord') as tfrecord_writer:
+                for i, filename in enumerate(test_filenames):
+                    sys.stdout.write('\r>> Converting image (Test) %d/%d' % (i+1, len(test_filenames)))
+                    sys.stdout.flush()
+
+                    name = filename[:-4]
+                    _add_to_tfrecord(dataset_dir, name, tfrecord_writer,
+                                     lambda x: _jpeg_image_shape(x, sess, decoded_jpeg, inputs))
+            print('\nFinished converting the DICOM dataset (Test)!')

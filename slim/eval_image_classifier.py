@@ -50,13 +50,13 @@ tf.app.flags.DEFINE_integer(
     'The number of threads used to create the batches.')
 
 tf.app.flags.DEFINE_string(
-    'dataset_name', 'imagenet', 'The name of the dataset to load.')
+    'dataset_name', 'dicom', 'The name of the dataset to load.')
 
 tf.app.flags.DEFINE_string(
     'dataset_split_name', 'test', 'The name of the train/test split.')
 
 tf.app.flags.DEFINE_string(
-    'dataset_dir', None, 'The directory where the dataset files are stored.')
+    'dataset_dir', '/data/tfrecord/sample_3000', 'The directory where the dataset files are stored.')
 
 tf.app.flags.DEFINE_integer(
     'labels_offset', 0,

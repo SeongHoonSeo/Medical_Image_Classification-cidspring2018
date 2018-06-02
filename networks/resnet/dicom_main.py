@@ -33,8 +33,11 @@ _NUM_CHANNELS = 3
 _NUM_CLASSES = 7
 
 _NUM_IMAGES = {
+# full train
+#    'train': 23360,
+#    'validation': 3002,
     'train': 2688,
-    'validation': 300,
+    'validation': 300
 }
 
 _NUM_TRAIN_FILES = 1
@@ -49,7 +52,7 @@ def get_filenames(is_training, data_dir):
   if is_training:
     return [os.path.join(data_dir, 'train-dicom.tfrecord')]
   else:
-    return [os.path.join(data_dir, 'test-dicom.tfrecord')]
+    return [os.path.join(data_dir, 'validation-dicom.tfrecord')]
 
 
 def _parse_example_proto(example_serialized):
