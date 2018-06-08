@@ -10,6 +10,7 @@ import sys
 import glob
 import argparse
 import progressbar
+import pymysql
 
 '''
     (Usage)
@@ -60,6 +61,13 @@ widgets=[
     ' (', progressbar.ETA(), ') ',
 ]
 
+conn = pymysql.connect(
+    host="127.0.0.1",
+    user="root",
+    password="healthhub",
+    db="dicom",
+    charset="utf8")
+
 
 '''
 Metadata rectifier
@@ -103,8 +111,22 @@ def database_fetch(query, root_dir):
     if not os.path.exists(os.path.join(root_dir, './fetch/')):
         os.makedirs(os.path.join(root_dir, './fetch/'))
 
-    # TODO: fetch data from database with query (only bodypart, e.g. 'CHEST')
-    # and save them in directory after making a new folder called 'fetch'
+    # Open cursor
+    curs = conn.cursor()
+
+    # Fetch data from database with query (only bodypart, e.g. 'CHEST')
+    sql = "SELECT * FROM dicom_table_test WHERE (bodypart=%s)"
+    curs.execute(sql, (query))
+    rows = curs.fetchall()
+
+    # Save data in directory after making a new folder called 'fetch'
+    for row in rows:
+        image_file = open(os.path.join(root_dir, './fetch/', row[0]), "wb")
+        image_file.write(row[2])
+        image_file.close()
+
+    # Close cursor
+    curs.close()
     
     return os.path.join(root_dir, './fetch/')
 

@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import progressbar
+import pymysql
 
 '''
     (Usage)
@@ -17,10 +18,19 @@ widgets=[
     ' (', progressbar.ETA(), ') ',
 ]
 
+conn = pymysql.connect(
+    host="127.0.0.1",
+    user="root",
+    password="healthhub",
+    db="dicom",
+    charset="utf8")
+
 
 def create_database():
-    # TODO: create database and its table
-    pass 
+    curs = conn.cursor()
+    sql = "CREATE TABLE dicom_table_test (id CHAR(100) NOT NULL, bodypart CHAR(30) NOT NULL, image MEDIUMBLOB NOT NULL, PRIMARY KEY(id))"
+    curs.execute(sql)
+    curs.close()
 
 
 def insert_database(root_dir):
@@ -30,20 +40,34 @@ def insert_database(root_dir):
     bar_idx = 0
     bar.start()
 
+    # Open cursor
+    curs = conn.cursor()
+
     for folder, subs, files in os.walk(root_dir):
         for filename in files:
             # Read DICOM raw file and required attribute
             image = pydicom.filereader.dcmread(os.path.join(folder, filename))
-            image_id = str(getattr(image, 'SOPInstanceUID'), 'utf-8', 'ignore')
+            image_id = str(getattr(image, 'SOPInstanceUID'), 'utf-8', 'ignore').replace('\0', '')
             image_bp = str(getattr(image, 'BodyPartExamined'), 'utf-8', 'ignore')
 
-            # TODO: insert each image into the database
+            # Open each image file
+            image_file = open(os.path.join(folder, filename), "rb")
+            image_content = image_file.read()
+            image_file.close()
+
+            # Insert each image into the database
+            sql = "INSERT INTO dicom_table_test(id, bodypart, image) VALUES (%s, %s, %s)"
+            curs.execute(sql, (image_id, image_bp, image_content))
+            conn.commit()
 
             # Update progressbar
             bar.update(bar_idx)
             bar_idx = bar_idx + 1
-    #Finish progressbar
+
+    # Finish progressbar
     bar.finish()
+    # Close cursor
+    curs.close()
 
 
 def main():
@@ -53,7 +77,17 @@ def main():
     if(args.directory is None):
         parser.print_help()
     else:
-        # TODO
+        curs = conn.cursor()
+        curs.execute("SHOW TABLES")
+        rows = curs.fetchall()
+        curs.close()
+        initialized = False
+        for row in rows:
+            if row[0] == "dicom_table_test":
+                initialized = True
+        if not initialized:
+            create_database()
+        insert_database(args.directory)
 
 
 if __name__ == "__main__":
