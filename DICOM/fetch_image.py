@@ -115,7 +115,7 @@ def database_fetch(query, root_dir):
     curs = conn.cursor()
 
     # Fetch data from database with query (only bodypart, e.g. 'CHEST')
-    sql = "SELECT * FROM dicom_table_test WHERE (bodypart=%s)"
+    sql = "SELECT * FROM dicom_table WHERE (bodypart=%s) LIMIT 60"
     curs.execute(sql, (query))
     rows = curs.fetchall()
 
@@ -147,36 +147,39 @@ def dicom_handler(root_dir, need_metadata):
 
     for folder, subs, files in os.walk(root_dir):
         for filename in files:
-            # Read DICOM raw file and remove redundant (masked) tags
-            dataset = pydicom.filereader.dcmread(os.path.join(folder, filename))
-            dataset.remove_private_tags()
+            try:
+                # Read DICOM raw file and remove redundant (masked) tags
+                dataset = pydicom.filereader.dcmread(os.path.join(folder, filename))
+                dataset.remove_private_tags()
 
-            # Recover attributes/metadata validity
-            int_setter(dataset, attr_int_list);
-            str_setter(dataset, attr_str_naming);
-            
-            image_name = str(dataset.BodyPartExamined + '_' + dataset.SOPInstanceUID + '_' + dataset.Modality).replace(' ', '').replace('\0','')
-            label_path = open(os.path.join(root_dir, '../labels/') + image_name + '.txt', 'w')
-            if(need_metadata):
-                # Not implemented in CNN, thereby writing only Bodypart instead
-                label_path.write(str(dataset.BodyPartExamined).lower().capitalize())
-            else:
-                # Capitalized Bodypart string to meet CNN convention
-                label_path.write(str(dataset.BodyPartExamined).lower().capitalize())
-            label_path.close()
+                # Recover attributes/metadata validity
+                int_setter(dataset, attr_int_list);
+                str_setter(dataset, attr_str_naming);
+                
+                image_name = str(dataset.BodyPartExamined + '_' + dataset.SOPInstanceUID + '_' + dataset.Modality).replace(' ', '').replace('\0','')
+                label_path = open(os.path.join(root_dir, '../labels/') + image_name + '.txt', 'w')
+                if(need_metadata):
+                    # Not implemented in CNN, thereby writing only Bodypart instead
+                    label_path.write(str(dataset.BodyPartExamined).lower().capitalize())
+                else:
+                    # Capitalized Bodypart string to meet CNN convention
+                    label_path.write(str(dataset.BodyPartExamined).lower().capitalize())
+                label_path.close()
 
-            # Save into png (code snippet from MRItoPNG (danishm/mritopng))
-            # Most of the images didn't contain Rescale-related metadata,
-            # thus Hounsfield Scale is not considered
-            shape = dataset.pixel_array.shape
-            image_2d = dataset.pixel_array.astype(float)
-            image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
-            image_2d_scaled = np.uint8(image_2d_scaled)
+                # Save into png (code snippet from MRItoPNG (danishm/mritopng))
+                # Most of the images didn't contain Rescale-related metadata,
+                # thus Hounsfield Scale is not considered
+                shape = dataset.pixel_array.shape
+                image_2d = dataset.pixel_array.astype(float)
+                image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
+                image_2d_scaled = np.uint8(image_2d_scaled)
 
-            image_path = open(os.path.join(root_dir, '../images/') + image_name + '.png', 'wb')
-            w = png.Writer(shape[1], shape[0], greyscale=True)
-            w.write(image_path, image_2d_scaled)
-            image_path.close()
+                image_path = open(os.path.join(root_dir, '../images/') + image_name + '.png', 'wb')
+                w = png.Writer(shape[1], shape[0], greyscale=True)
+                w.write(image_path, image_2d_scaled)
+                image_path.close()
+            except:
+                print("Invalid format detected: ignoring the file")
             
             # Update progressbar
             bar_idx = bar_idx + 1

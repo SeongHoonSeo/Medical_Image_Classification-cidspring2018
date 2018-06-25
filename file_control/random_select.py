@@ -5,10 +5,10 @@ import shutil
 import random
 import os.path
 
-src_dir = '/data/Bodypart/HIP&PELVIS'
-target_dir = '/data/Bodypart/full_29363/Musculoskeletal/images'
+src_dir = '/data/Bodypart/full_29363/images'
+target_dir = '/home/ubuntu/results/prediction/test_images'
 
-target_num = 99999
+target_num = 32
 
 src_files = (os.listdir(src_dir))
 def valid_path(dir_path, filename):
@@ -32,7 +32,7 @@ for filename in choices:
     shutil.copy(file, target_dir)
 
     # Rename the copied file
-    dst_file = os.path.join(target_dir, filename)
-    new_dst_file = os.path.join(target_dir, 'HipPelvis_' + filename)
-    os.rename(dst_file, new_dst_file)
+    #dst_file = os.path.join(target_dir, filename)
+    #new_dst_file = os.path.join(target_dir, 'HipPelvis_' + filename)
+    #os.rename(dst_file, new_dst_file)
 print ('Finished!')

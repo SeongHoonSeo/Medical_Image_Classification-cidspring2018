@@ -1,1 +1,1 @@
-sudo strace -p7262 -s9999 -e write
+sudo strace -p26769 -s9999 -e write

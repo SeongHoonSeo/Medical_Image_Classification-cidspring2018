@@ -278,6 +278,24 @@ def resnet_model_fn(features, labels, mode, model_class,
         learning_rate=learning_rate,
         momentum=momentum)
 
+#    optimizer = tf.train.RMSPropOptimizer(
+#        learning_rate=0.001,
+#        decay=0.9,
+#        momentum=momentum,
+#        epsilon=1e-10,
+#        use_locking=False,
+#        centered=False,
+#        name='RMSProp',
+#    )
+
+#    optimizer = tf.train.AdamOptimizer(
+#        learning_rate=0.001,
+#        beta1=0.9,
+#        beta2=0.999,
+#        epsilon=1e-08,
+#        use_locking=False,
+#        name='Adam')
+
     # If we are running multi-GPU, we need to wrap the optimizer.
     if multi_gpu:
       optimizer = tf.contrib.estimator.TowerOptimizer(optimizer)

@@ -72,9 +72,9 @@ def _process_image(directory, name, f_jpeg_image_shape,
     bboxes = []
 
     # Read the txt label file, if it exists.
-    filename = os.path.join(directory, label_dir, name + '.txt')
-    if os.path.exists(filename):
-        with open(filename) as f:
+    filename2 = os.path.join(directory, label_dir, name + '.txt')
+    if os.path.exists(filename2):
+        with open(filename2) as f:
             label_data = f.readlines()
         for l in label_data:
             data = l.split()
@@ -91,9 +91,9 @@ def _process_image(directory, name, f_jpeg_image_shape,
                 # bbox
                 bboxes.append((0.0, 0.0, 1.0, 1.0)) # Set the entire image as bbox for classification task
 
-    return (image_data, shape, labels, labels_text,  bboxes)
+    return (image_data, shape, labels, labels_text,  bboxes, filename)
 
-def _convert_to_example(image_data, shape, labels, labels_text, bboxes):
+def _convert_to_example(image_data, shape, labels, labels_text, bboxes, filename):
     """Build an Example proto for an image example.
 
     Args:
@@ -128,6 +128,7 @@ def _convert_to_example(image_data, shape, labels, labels_text, bboxes):
             'image/object/bbox/xmax': float_feature(next(it_bboxes, [])),
             'image/object/bbox/ymax': float_feature(next(it_bboxes, [])),
             'image/object/class/label': int64_feature(labels),
+            'image/filename': bytes_feature(filename.encode()),
             }))
     return example
 
@@ -173,9 +174,9 @@ def run(dataset_dir, output_dir, name='dicom_train', shuffling=True, need_split=
     filenames = os.listdir(path)
     filenames.sort()
 
-    if shuffling:
-        random.seed(RANDOM_SEED)
-        random.shuffle(filenames)
+#    if shuffling:
+#        random.seed(RANDOM_SEED)
+#        random.shuffle(filenames)
 
     # jpeg decoding.
     inputs = tf.placeholder(dtype=tf.string)

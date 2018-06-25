@@ -28,7 +28,7 @@ conn = pymysql.connect(
 
 def create_database():
     curs = conn.cursor()
-    sql = "CREATE TABLE dicom_table_test (id CHAR(100) NOT NULL, bodypart CHAR(30) NOT NULL, image MEDIUMBLOB NOT NULL, PRIMARY KEY(id))"
+    sql = "CREATE TABLE dicom_table (id CHAR(100) NOT NULL, bodypart CHAR(30) NOT NULL, image MEDIUMBLOB NOT NULL, PRIMARY KEY(id))"
     curs.execute(sql)
     curs.close()
 
@@ -45,20 +45,23 @@ def insert_database(root_dir):
 
     for folder, subs, files in os.walk(root_dir):
         for filename in files:
-            # Read DICOM raw file and required attribute
-            image = pydicom.filereader.dcmread(os.path.join(folder, filename))
-            image_id = str(getattr(image, 'SOPInstanceUID'), 'utf-8', 'ignore').replace('\0', '')
-            image_bp = str(getattr(image, 'BodyPartExamined'), 'utf-8', 'ignore')
+            try:
+                # Read DICOM raw file and required attribute
+                image = pydicom.filereader.dcmread(os.path.join(folder, filename))
+                image_id = str(getattr(image, 'SOPInstanceUID'), 'utf-8', 'ignore').replace('\0', '')
+                image_bp = str(getattr(image, 'BodyPartExamined'), 'utf-8', 'ignore').replace('\0', '')
 
-            # Open each image file
-            image_file = open(os.path.join(folder, filename), "rb")
-            image_content = image_file.read()
-            image_file.close()
+                # Open each image file
+                image_file = open(os.path.join(folder, filename), "rb")
+                image_content = image_file.read()
+                image_file.close()
 
-            # Insert each image into the database
-            sql = "INSERT INTO dicom_table_test(id, bodypart, image) VALUES (%s, %s, %s)"
-            curs.execute(sql, (image_id, image_bp, image_content))
-            conn.commit()
+                # Insert each image into the database
+                sql = "INSERT INTO dicom_table(id, bodypart, image) VALUES (%s, %s, %s)"
+                curs.execute(sql, (image_id, image_bp, image_content))
+                conn.commit()
+            except:
+                print("Invalid metadata detected: ignoring the file")
 
             # Update progressbar
             bar.update(bar_idx)
@@ -83,7 +86,7 @@ def main():
         curs.close()
         initialized = False
         for row in rows:
-            if row[0] == "dicom_table_test":
+            if row[0] == "dicom_table":
                 initialized = True
         if not initialized:
             create_database()
