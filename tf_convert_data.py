@@ -44,7 +44,7 @@ tf.app.flags.DEFINE_string(
     'Output directory where to store TFRecords files.')
 tf.app.flags.DEFINE_string(
     'need_split', 'None',
-    'None: no spit, tt_split: train/test split, tvt_split: train/test/validation split')
+    'None: no split, tt_split: train/test split, tvt_split: train/validation/test split')
 
 def main(_):
     if not FLAGS.dataset_dir:
