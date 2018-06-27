@@ -33,15 +33,15 @@ _NUM_CHANNELS = 3
 _NUM_CLASSES = 7
 
 _NUM_IMAGES = {
-# preprocessor experiment
-    'train': 23360,
-    'validation': 150
 # full train
-#    'train': 23360,
-#    'validation': 3002,
+    'train': 23360,
+    'validation': 3002,
 # sample:3000
 #    'train': 2688,
 #    'validation': 300
+# preprocessor experiment
+#    'train': 23360,
+#    'validation': 150
 }
 
 _NUM_TRAIN_FILES = 1
