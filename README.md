@@ -23,7 +23,8 @@ Implement a highly accurate body part classifier using computer vision technolog
 * Premise 2: an image-label pair should have the **same name** (ex. `000000.jpg` and `000000.txt`)
 * Premise 3: the label file should contain the label in **text** (ex. Abdomen, Chest)
 * Premise 4: the size of validation and test dataset should be correctly written in `./dataset/dicom_to_tfrecords.py` line 36-37 
-#### Example Usage:
+
+#### Example Usage
 ```
 python tf_convert_data.py \
 --dataset_name=dicom \
@@ -32,7 +33,7 @@ python tf_convert_data.py \
 --output_dir=/data/sample/training \
 --need_split=tvt_split
 ```
-#### Command Line Argument Description:
+#### Command Line Argument Description
 * `dataset_name`: name of the dataset. Set as `dicom`
 * `dataset_dir`: the location of the dataset directory
 * `output_name`: name of the output file (used only when `need_split` is set as `None`)
@@ -44,7 +45,8 @@ python tf_convert_data.py \
 ### 3. Train and Evaluate with ResNet (Native TensorFlow)
 
 * Premise 1: the size of train and validation dataset should be correctly written in `./networks/resnet/dicom_main.py` line 37-38 (the code will periodically evaluate the network with validation set)
-#### Example Usage:
+
+#### Example Usage
 ```
 python dicom_main.py \
 --data_dir=/data/sample/training \
@@ -56,7 +58,7 @@ python dicom_main.py \
 --resnet_size=152 \
 --multi_gpu=False
 ```
-#### Command Line Argument Description:
+#### Command Line Argument Description
 ```
   -h, --help            show this help message and exit
   --data_dir <DD>, -dd <DD>
@@ -160,3 +162,45 @@ python dicom_main.py \
                         [default: 50] The size of the ResNet model to use.
   --multi_gpu {False,True}, -mg {False,True}
 ```
+
+### 4. Predict new images with the trained network
+* Premise 1: The prediction module works for TF-slim only. Use checkpoint created with TF-Slim.
+* Premsie 2: Saved checkpoint files are required to reconstruct the network. (modle.ckpt-xxxxx)
+* Premise 3: Prediction can be done for both raw images and tfrecord files (set the tfrecord flag accordingly)
+
+#### Example Usage 1 (Raw Image)
+```
+python classify_image.py \
+--num_classes=7 \
+--infile=input.txt \
+--tfrecord=False \
+--outfile=prediction_result.txt \
+--model_name=resnet_v2_152 \
+--checkpoint_path=/data/model/resnet152/model.ckpt-8400
+```
+* Note that `input.txt` consists a list of image file names (one image per line). absolute/relative path should be specified    
+```
+/data/Bodypart/000000.jpg  
+/data/Bodypart/000001.jpg  
+/data/Bodypart/000002.jpg  
+...
+```
+
+#### Example Usage 2 (tfrecord)
+```
+python classify_image.py \
+--num_classes=7 \
+--infile=/data/tfrecord/test-dicom.tfrecord \
+--tfrecord=True \
+--outfile=prediction_result.txt \
+--model_name=resnet_v2_152 \
+--checkpoint_path=/data/model/resnet152/model.ckpt-8400
+```
+
+#### Command Line Argument Description
+* `num_classes`: number of classes
+* `infile`: input file (tfrecord OR text file with list of input images)
+* `tfrecord`: True if input file is tfercord, else False
+* `outfile`: output file with prediction results
+* `model_name`: name of the network model
+* `checkpoint_path`: path where checkpoint files are located

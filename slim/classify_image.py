@@ -3,19 +3,18 @@
 # Overall code referenced from:
 # https://github.com/lixiangchun/mynotebook/blob/master/machine_learning/classify_image.py
 
-
 from __future__ import print_function
 import sys
 sys.path.append('../../tensorflow/models/slim/') # add slim to PYTHONPATH
 import tensorflow as tf
 
 tf.app.flags.DEFINE_integer('num_classes', 7, 'The number of classes.')
-tf.app.flags.DEFINE_string('infile','/data/tfrecord/test_35/test-dicom.tfrecord','Image file, one image per line.')
-tf.app.flags.DEFINE_boolean('tfrecord',True, 'Input file is formatted as TFRecord.')
-tf.app.flags.DEFINE_string('outfile','prediction_result_test_35.txt', 'Output file for prediction probabilities.')
+tf.app.flags.DEFINE_string('infile','/data/tfrecord/test-dicom.tfrecord','Image file, one image per line.')
+tf.app.flags.DEFINE_boolean('tfrecord',False, 'Input file is formatted as TFRecord.')
+tf.app.flags.DEFINE_string('outfile','prediction_result.txt', 'Output file for prediction probabilities.')
 tf.app.flags.DEFINE_string('model_name', 'resnet_v2_152', 'The name of the architecture to evaluate.')
 tf.app.flags.DEFINE_string('preprocessing_name', None, 'The name of the preprocessing to use. If left as `None`, then the model_name flag is used.')
-tf.app.flags.DEFINE_string('checkpoint_path', '/data/log_dir/180518_3000_resnet_r/model.ckpt-8400','The directory where the model was written to or an absolute path to a checkpoint file.')
+tf.app.flags.DEFINE_string('checkpoint_path', '/data/model/resnet152/model.ckpt-8400','The directory where the model was written to or an absolute path to a checkpoint file.')
 tf.app.flags.DEFINE_integer('eval_image_size', None, 'Eval image size.')
 FLAGS = tf.app.flags.FLAGS
 
@@ -58,9 +57,6 @@ if model_variables is None:
   tf.logging.error("Unknown model_name provided `%s`." % FLAGS.model_name)
   sys.exit(-1)
 
-if FLAGS.tfrecord:
-  tf.logging.warn('Image name is not available in TFRecord file.')
-
 if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
   checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
 else:
@@ -68,16 +64,7 @@ else:
 
 image_string = tf.placeholder(tf.string) # Entry to the computational graph, e.g. image_string = tf.gfile.FastGFile(image_file).read()
 
-#image = tf.image.decode_image(image_string, channels=3)
 image = tf.image.decode_jpeg(image_string, channels=3, try_recover_truncated=True, acceptable_fraction=0.3) ## To process corrupted image files
-
-#image = []
-#for file in os.listdir(image_path):
-#  if file.endswith(".jpg"):
-#    img = misc.imread(image_path + file)
-#    img = img.astype('Float32')
-#    img = np.resize(img, (224, 224, 3))
-#    image.append(img)
 
 image_preprocessing_fn = preprocessing_factory.get_preprocessing(preprocessing_name, is_training=False)
 
@@ -113,7 +100,7 @@ for fl in fls:
 
   try:
     if FLAGS.tfrecord is False:
-      x = tf.gfile.FastGFile(fl).read() # You can also use x = open(fl).read()
+      x = tf.gfile.FastGFile(fl, 'rb').read() # You can also use x = open(fl).read()
       image_name = os.path.basename(fl)
     else:
       example = tf.train.Example()
@@ -122,7 +109,7 @@ for fl in fls:
       # Note: The key of example.features.feature depends on how you generate tfrecord.
       x = example.features.feature['image/encoded'].bytes_list.value[0] # retrieve image string
 
-#      image_name = example.features.feature['image/class/label'].int64_list.value[0]
+#      image_name = example.features.feature['image/class/label'].int64_list.value[0] // uncomment to replace filename with groundtruth label
       image_name = example.features.feature['image/filename'].bytes_list.value[0].decode()
 
     probs = sess.run(probabilities, feed_dict={image_string:x})
