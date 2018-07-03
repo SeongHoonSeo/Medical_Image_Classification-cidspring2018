@@ -5,15 +5,62 @@
 
 Implement a highly accurate body part classifier using computer vision technology
 
-## Timeline
-| Sprint | Period | Presentation |
-| :-: | :-: | :-: |
-| Sprint 1 | 3/21 ~ 4/1 |  |
-| Sprint 2 | 4/2 ~ 4/16 | Specification (3/30 ~ 4/6) |
-| Sprint 3 | 4/17 ~ 5/1 | Midterm (4/27) |
-| Sprint 4 | 5/2 ~ 5/16 |  |
-| Sprint 5 | 5/17 ~ 5/31 |  |
-| Sprint 6 | 6/1 ~ 6/15 | Final (6/15) |
+## How to use the database & preprocessor
+
+### 1. Create a database
+
+* Premise 1: MySQL account can be handled in `/DICOM/create\_database.py` line 21-26
+* Premise 2: Current database only handles ID(string), bodypart(string) and image(binary) and regards ID as a primary key
+* Premise 3: `directory` in the command line argument indicates the directory to fetch the data from
+
+#### Example Usage
+```
+cd DICOM
+python create_database.py \
+--directory /data/Dicom_bodypart
+```
+
+### 2. Fetch image from database
+
+* Premise 1: Not all attributes are cleansed throughout the process, only the attributes that are indicated in `attr_int_list` and `attr_str_list` will be cleansed
+* Premise 2: Saving metadata is not enabled at the moment, since it takes a wide scope of code modification in body part classifier
+
+#### Example Usage
+```
+cd DICOM
+python fetch_image.py \
+--query CHEST \
+--directory /data/Dicom_bodypart \
+--metadata False
+```
+
+#### Command Line Argument Description
+* `query`: bodypart to be fetched, i.e. CHEST, ABDOMEN, MUSCULOSKELETAL, etc
+* `directory`: directory to save image (the program will automatically save the images and its metadata in `/image` subdirectory and `/labels` subdirectory respectively)
+* `metadata`: whether to extract metadata from the database (False)
+
+### 3. Preprocess image
+
+#### Explanation on preprocessing methods
+There are four types of preprocessing methods.
+* `bitwise downsampling` can literally 'downsample' the image, thereby easily saving space for image. Though this cannot capture subtle or meticulous feature of the image, this method can retain the macroscopic feature of the given image.
+* `contrast enhancing` can make the image vivid, which is effective for initially dull images. Note that the image before enhancing has different context compared to the image after enhancing, which means that domain transfer can be applicable to some extent.
+* `color quantization` can downsample the image in a more smarter manner. This does not damage the context of original image compared to other preprocessing methods. But in order to dramatically save space for image, extra module for encoding and decoding is required.
+* `target segmentation`, which is widely used for 3D-segmentation of CT modality, is not really effective in CR modality according to the conducted experiment. But this method can be effective for some other domains like CT modality.
+
+#### Example Usage
+```
+cd DICOM
+python preprocess_image.py \
+--directory /data/Dicom_bodypart \
+--preprocess bitwise_downsampling \
+--value 4
+```
+
+#### Command Line Argument Description
+* `directory`: directory to fetch image and save preprocessed image
+* `preprocess`: preprocessing method (bitwise\_downsampling(1~8), contrast\_enhancing(1~10), color\_quantization(2~10), target\_segmentation(1~10))
+* `value`: intensity or preprocessing. default value is 4, and value above or below the range (which is specified above) will be regarded as the maximum or minimum value possible, respectively.
 
 ## How to use the code
 
@@ -41,6 +88,68 @@ python tf_convert_data.py \
 * `need_split`: whether to split the dataset. `None`: no split, `tt_split`: train/test split, `tvt_split`: train/validation/test split
 
 ### 2. Train and Evaluate with various networks (TensorFlow Slim)
+
+* Premise 1. Model parameter for Slim and native TensorFlow are **not** compatible!
+(Detailed information can be found [here](https://github.com/HS-YN/MedicalCV/tree/master/slim)).
+
+#### Example Usage - Training from Scratch
+```
+cd slim
+python train_image_classifier.py \
+--save_interval_secs=3000 \
+--save_summaries_secs=3000 \
+--train_dir=/data/log_dir/inception_v4 \
+--model_name=inception_v4 \
+--max_number_of_steps=1680 \
+>> ~/log/180501_inception_v4/train.txt
+```
+
+#### Example Usage - Training Using Pretrained Parameters
+```
+cd slim
+python train_image_classifier.py \
+--save_interval_secs=3000 \
+--save_summaries_secs=3000 \
+--train_dir=/data/log_dir/inception_v4 \
+--checkpoint_exclude_scopes=InceptionV4/Logits,InceptionV4/AuxLogits \
+--trainable_scopes=InceptionV4/Logits,InceptionV4/AuxLogits \
+--model_name=inception_v4 \
+--max_number_of_steps=1680 \
+>> ~/log/180501_inception_v4/train.txt
+```
+
+#### Example Usage - Evaluation
+```
+cd slim
+python eval_image_classifier.py \
+--alsologtostderr \
+--model_name=inception_v4 \
+--checkpoint_path=/data/log_dir/inception_v4 \
+> ~/log/180501_inception_v4/eval1680.txt
+```
+
+#### Example Usage - Automatic Management
+For more practical usage of continuous training & testing with logging, please refer [here](https://github.com/HS-YN/MedicalCV/tree/master/scripts/02_small).
+```
+(
+nohup python train_image_classifier.py \
+--save_interval_secs=3000 \
+--save_summaries_secs=3000 \
+--train_dir=/data/log_dir/inception_v4 \
+--model_name=inception_v4 \
+--max_number_of_steps=1680 \
+>> ~/log/180501_inception_v4/train.txt
+&&
+nohup python eval_image_classifier.py \
+--alsologtostderr \
+--model_name=inception_v4 \
+--checkpoint_path=/data/log_dir/inception_v4 \
+> ~/log/180501_inception_v4/eval1680.txt
+)&
+```
+
+#### Command Line Argument Description
+There are tons of arguments that are at users' disposal, and explanations on these arguments can be found at `/slim/train_image_classifier.py` and `/slim/eval_image_classifier.py`
 
 ### 3. Train and Evaluate with ResNet (Native TensorFlow)
 
