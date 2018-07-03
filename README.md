@@ -9,7 +9,7 @@ Implement a highly accurate body part classifier using computer vision technolog
 
 ### 1. Create a database
 
-* Premise 1: MySQL account can be handled in `/DICOM/create\_database.py` line 21-26
+* Premise 1: MySQL account can be handled in `/DICOM/create_database.py` line 21-26
 * Premise 2: Current database only handles ID(string), bodypart(string) and image(binary) and regards ID as a primary key
 * Premise 3: `directory` in the command line argument indicates the directory to fetch the data from
 
@@ -59,7 +59,7 @@ python preprocess_image.py \
 
 #### Command Line Argument Description
 * `directory`: directory to fetch image and save preprocessed image
-* `preprocess`: preprocessing method (bitwise\_downsampling(1~8), contrast\_enhancing(1~10), color\_quantization(2~10), target\_segmentation(1~10))
+* `preprocess`: preprocessing method (bitwise\_downsampling(1 to 8), contrast\_enhancing(1 to 10), color\_quantization(2 to 10), target\_segmentation(1 to 10))
 * `value`: intensity or preprocessing. default value is 4, and value above or below the range (which is specified above) will be regarded as the maximum or minimum value possible, respectively.
 
 ## How to use the code
@@ -89,7 +89,7 @@ python tf_convert_data.py \
 
 ### 2. Train and Evaluate with various networks (TensorFlow Slim)
 
-* Premise 1. Model parameter for Slim and native TensorFlow are **not** compatible!
+* Premise 1. Model parameter for Slim and native TensorFlow are **not** compatible!<br>
 (Detailed information can be found [here](https://github.com/HS-YN/MedicalCV/tree/master/slim)).
 
 #### Example Usage - Training from Scratch
@@ -129,7 +129,7 @@ python eval_image_classifier.py \
 ```
 
 #### Example Usage - Automatic Management
-For more practical usage of continuous training & testing with logging, please refer [here](https://github.com/HS-YN/MedicalCV/tree/master/scripts/02_small).
+For more practical usage of continuous training & testing with logging, please refer to [these examples](https://github.com/HS-YN/MedicalCV/tree/master/scripts/02_small).
 ```
 (
 nohup python train_image_classifier.py \
